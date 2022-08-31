@@ -1,0 +1,43 @@
+<html>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <head>
+    <script src="https://unpkg.com/vue@3"></script>
+  </head>
+  <body id="app">
+    <form method="POST">
+      <p>原文<br><textarea name="source" id="source" rows="8" cols="80" v-model='source'></textarea></p>
+      <p>翻译<br><textarea name="translated" id="translated" rows="8" cols="80" readonly v-model='translation'></textarea></p>
+      <p><input type="submit" value="Translate" @click="translate"></p>
+    </form>
+  </body>
+  <script>
+    const { createApp } = Vue
+    createApp({
+      data() {
+        return {
+          source: 'Hello World',
+          translation: ''
+        }
+      },
+      // Avoid conflict with Flask delimiters
+      compilerOptions: {
+        delimiters: ["%%", "%%"]
+      },
+      methods: {
+        async translate(event){
+          if(event) event.preventDefault()
+          this.translation = '翻译中...'
+          var body = new FormData()
+          body.append('source', this.source);
+          const requestOptions = {
+            method: "POST",
+            body
+          }
+          const response = await fetch("/api", requestOptions);
+          const data = await response.json()
+          this.translation = data
+        }
+      }
+    }).mount('#app')
+  </script>
+</html>
